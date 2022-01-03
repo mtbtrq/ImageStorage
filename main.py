@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 while True:
     databaseName = "database.db"
@@ -18,23 +19,40 @@ while True:
     action = (input("What do you want to do? (Store / View): ")).lower()
 
     if action == "store" or action == "s":
-        fileName = input("Enter the name of the file you want to store in the database including the file extension: ")
+        fileName = input("Enter the name of the file you want to store in the database including the file extension (or enter 'a' to store every image in the current directory): ")
+        if fileName == "a":
+            fileExtension = input("Enter the name of the file type you want to store (e.g: .png, .jpg): ")
+            filesInDirectory = os.listdir()
+            for file in filesInDirectory:
+                if file.endswith(fileExtension):
+                    try:
+                        with open(file, "rb") as f:
+                            readByte = f.read()
+                    except Exception as e:
+                        print("No PNG files found!")
+                        continue
 
-        try:
-            with open(fileName, "rb") as f:
-                readByte = f.read()
-        except Exception as e:
-            print("Error, incorrect file name specified!")
-            continue
+                    crsr.execute(f"INSERT INTO {tableName} VALUES (?, ?)", (file, readByte))
 
-        crsr.execute(f"INSERT INTO {tableName} VALUES (?, ?)", (fileName, readByte))
+                    print("Successfully completed task!")
 
-        print("Successfully completed task!")
+                    mainDatabase.commit()
+                else:
+                    pass
+        else:
+            try:
+                with open(fileName, "rb") as f:
+                    readByte = f.read()
+            except Exception as e:
+                print("Error, incorrect file name specified!")
+                continue
 
-        mainDatabase.commit()
-        crsr.close()
-        mainDatabase.close()
-        
+            crsr.execute(f"INSERT INTO {tableName} VALUES (?, ?)", (fileName, readByte))
+
+            print("Successfully completed task!")
+
+            mainDatabase.commit()
+
     elif action == "view" or action == "v":
         crsr.execute(F"SELECT * FROM {tableName}")
         images = crsr.fetchall()
