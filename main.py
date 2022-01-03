@@ -34,7 +34,7 @@ while True:
 
                     crsr.execute(f"INSERT INTO {tableName} VALUES (?, ?)", (file, readByte))
 
-                    print("Successfully completed task!")
+                    print(f"Successfully found {file} and stored in the database.")
 
                     mainDatabase.commit()
                 else:
